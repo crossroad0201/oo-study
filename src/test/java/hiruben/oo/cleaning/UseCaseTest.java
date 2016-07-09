@@ -46,10 +46,10 @@ public class UseCaseTest {
      * 徳川さんが4月21日に取りに見えたので、すでにできていたワイシャツだけをお返しした。
      */
     CollectResult collected = shop.collect(ticket);
-    System.out.println(collected.ticket);
+    System.out.println(collected);
 
-    assertThat("チケットが返却されている", collected.ticket, notNullValue());
-    assertThat("返却されたチケットの未返却品が、まだ受け取っていないクリーニング品と一致する", collected.ticket.remainingItems().length, equalTo(1));
+    assertThat("チケットが返却されている", collected.ticket.isPresent(), is(true));
+    assertThat("返却されたチケットの未返却品が、まだ受け取っていないクリーニング品と一致する", collected.ticket.get().remainingItems().length, equalTo(1));
     assertThat("返却されたクリーニング品が一致する", collected.items.length, equalTo(1));
   }
 

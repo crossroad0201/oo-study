@@ -2,6 +2,7 @@ package hiruben.oo.cleaning.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 「価格表」です。
@@ -38,18 +39,18 @@ public class PriceList {
    * メニューを返します。
    *
    * @param process 加工
-   * @param itemKind 品目
+   * @param kind 品目
    * @return メニュー
    */
-  public Menu findMenu(Process process, ItemKind itemKind) {
+  public Menu findMenu(Process process, ItemKind kind) {
     for (Menu menu : menus) {
-      if (menu.process == process && menu.kind == itemKind) {
+      if (menu.kind.isPresent() && menu.kind.get() == kind && menu.process == process) {
         return menu;
       }
     }
 
     for (Menu menu : menus) {
-      if (menu.process == process && menu.kind == null) {
+      if (!menu.kind.isPresent() && menu.process == process) {
         return menu;
       }
     }
@@ -76,27 +77,27 @@ public class PriceList {
     /** 加工 */
     public final Process process;
     /** 品目 */
-    public final ItemKind kind; // TODO Optional
+    public final Optional<ItemKind> kind;
     /** 価格 */
     public final int price;
 
-    private Menu(Process process, ItemKind kind, int price) {
+    private Menu(Process process, Optional<ItemKind> kind, int price) {
       this.process = process;
       this.kind = kind;
       this.price = price;
     }
 
     static Menu forItem(Process process, ItemKind itemKind, int price) {
-      return new Menu(process, itemKind, price);
+      return new Menu(process, Optional.of(itemKind), price);
     }
 
     static Menu forAllItem(Process process, int price) {
-      return new Menu(process, null, price);
+      return new Menu(process, Optional.empty(), price);
     }
 
     @Override
     public String toString() {
-      return String.format("%s %s %s", process, kind != null ? kind : "All", price);
+      return String.format("%s %s %s", process, kind.isPresent() ? kind.get() : "All", price);
     }
   }
 
