@@ -11,11 +11,14 @@ import java.util.Map;
 public class CleaningShop {
   /** 店名 */
   public final String name;
+  /** 価格表 */
+  public final PriceList priceList;
 
   private final Map<String, Order> orders = new LinkedHashMap<>();
 
-  public CleaningShop(String name) {
+  public CleaningShop(String name, PriceList priceList) {
     this.name = name;
+    this.priceList = priceList;
   }
 
   /**
@@ -26,6 +29,14 @@ public class CleaningShop {
    * @return チケット
    */
   public Ticket accept(Customer customer, CleaningItem... items) {
+    for (CleaningItem item : items) {
+      for (Process process : item.processes) {
+        if (priceList.findMenu(process, item.kind) == null) {
+          throw new RuntimeException(String.format("メニューがありません。%s %s", item.kind, process));
+        }
+      }
+    }
+
     Order order = new Order("123", this, customer, items);
     orders.put(order.referenceNumber, order);
 
@@ -52,7 +63,7 @@ public class CleaningShop {
     /* 加工が完了しているクリーニング品について、チケットから消しこんでいく */
     List<CleaningItem> items = new ArrayList<>();
     for (CleaningItem item : order.completedItems()) {
-      if (ticket.isRemaining(item)) {
+      if (ticket.hasRemaining(item)) {
         ticket.markAsCollected(item);
         items.add(item);
       }
@@ -72,4 +83,12 @@ public class CleaningShop {
     return this;
   }
 
+  @Override
+  public String toString() {
+    StringBuilder s = new StringBuilder()
+        .append(String.format("店舗 : %s\n", name))
+        .append(priceList);
+
+    return s.toString();
+  }
 }

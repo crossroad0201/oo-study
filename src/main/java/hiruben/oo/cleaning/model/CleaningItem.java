@@ -1,27 +1,29 @@
 package hiruben.oo.cleaning.model;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * 「クリーニング品」です。
  */
 public class CleaningItem {
-  /** 名前 */
-  public final String name;
   /** 品目 */
-  public final Item item;
+  public final ItemKind kind;
   /** 加工方法 */
   public final Process[] processes;
 
-  public CleaningItem(String name, Item item, Process... processes) {
-    this.name = name;
-    this.item = item;
-    this.processes = processes;
+  public CleaningItem(ItemKind kind, Process process, Process... additonalProcesses) {
+    this.kind = kind;
+    List<Process> ps = new ArrayList<Process>();
+    ps.add(process);
+    ps.addAll(Arrays.asList(additonalProcesses));
+    this.processes = ps.toArray(new Process[0]);
   }
 
   @Override
   public int hashCode() {
-    return name.hashCode() + item.hashCode() + Arrays.hashCode(processes);
+    return kind.hashCode() + Arrays.hashCode(processes);
   }
 
   @Override
@@ -31,8 +33,12 @@ public class CleaningItem {
     }
     CleaningItem other = (CleaningItem) obj;
     return
-        this.name.equals(other.name)
-        && this.item == other.item
-        && Arrays.equals(this.processes, other.processes);
+        kind == other.kind
+        && Arrays.equals(processes, other.processes);
+  }
+
+  @Override
+  public String toString() {
+    return String.format("%s %s", kind, Arrays.toString(processes));
   }
 }

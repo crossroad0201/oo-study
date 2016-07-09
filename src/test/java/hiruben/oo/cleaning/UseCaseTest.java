@@ -10,16 +10,29 @@ public class UseCaseTest {
 
   @Test
   public void 徳川さんの場合() {
-    CleaningShop shop = new CleaningShop("テスト店");
+    /*
+     * 背広のドライクリーニング代金は800円、ワイシャツのドライは200円、水洗いは150円、防虫加工は品目にかかわらず一律500円である。
+     */
+    CleaningShop shop = new CleaningShop("テスト店",
+        new PriceList()
+          .addMenu(Process.DRY_CLEANING, ItemKind.SUIT, 800)
+          .addMenu(Process.DRY_CLEANING, ItemKind.SHIRT, 200)
+          .addMenu(Process.WATER_WASH, ItemKind.SHIRT, 150)
+          .addMenu(Process.MOTHPROOFING, 500)
+    );
+    System.out.println(shop);
+
+    PriceList.Menu m = shop.priceList.findMenu(Process.DRY_CLEANING, ItemKind.SUIT);
 
     /*
      * 徳川さんから4月18日に、背広のドライクリーニングと防虫加工、ワイシャツの水洗いと防虫加工でお預かりした。
      */
     Customer tokugawa = new Customer("徳川", "06-1234-5678");
-    CleaningItem suit = new CleaningItem("徳川さんの背広", Item.SUIT, Process.DRY_CLEANING, Process.MOTHPROOFING);
-    CleaningItem shirt = new CleaningItem("徳川さんのワイシャツ", Item.SHIRT, Process.WATER_WASH, Process.MOTHPROOFING);
+    CleaningItem suit = new CleaningItem(ItemKind.SUIT, Process.DRY_CLEANING, Process.MOTHPROOFING);
+    CleaningItem shirt = new CleaningItem(ItemKind.SHIRT, Process.WATER_WASH, Process.MOTHPROOFING);
 
     Ticket ticket = shop.accept(tokugawa, suit, shirt);
+    System.out.println(ticket);
 
     assertThat("チケットに整理番号が記載されている", ticket.referenceNumber, equalTo("123"));
     assertThat("チケットに店名が記載されている", ticket.shopName, equalTo("テスト店"));
@@ -33,6 +46,7 @@ public class UseCaseTest {
      * 徳川さんが4月21日に取りに見えたので、すでにできていたワイシャツだけをお返しした。
      */
     CollectResult collected = shop.collect(ticket);
+    System.out.println(collected.ticket);
 
     assertThat("チケットが返却されている", collected.ticket, notNullValue());
     assertThat("返却されたチケットの未返却品が、まだ受け取っていないクリーニング品と一致する", collected.ticket.remainingItems().length, equalTo(1));
