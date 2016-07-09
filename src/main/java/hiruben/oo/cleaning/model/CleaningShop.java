@@ -26,24 +26,28 @@ public class CleaningShop {
    *
    * @param customer お客さん
    * @param items クリーニング品
-   * @return チケット
+   * @return 注文
    */
-  public Ticket accept(Customer customer, CleaningItem... items) {
+  public Order accept(Customer customer, CleaningItem... items) {
     for (CleaningItem item : items) {
       for (Process process : item.processes) {
-        if (priceList.findMenu(process, item.kind) == null) {
+        if (!priceList.findMenu(process, item.kind).isPresent()) {
           throw new RuntimeException(String.format("メニューがありません。%s %s", item.kind, process));
         }
       }
     }
 
-    Order order = new Order("123", this, customer, items);
+    Order order = new Order(nextReferenceNumber(), this, customer, items);
     orders.put(order.referenceNumber, order);
 
-    return order.issueTicket();
+    return order;
   }
 
-  Order findOrder(String referenceNumber) {
+  private String nextReferenceNumber() {
+    return "123";
+  }
+
+  private Order findOrder(String referenceNumber) {
     if (!orders.containsKey(referenceNumber)) {
       throw new RuntimeException(String.format("整理番号 %s の注文はありません。", referenceNumber));
     }
@@ -54,33 +58,34 @@ public class CleaningShop {
   /**
    * クリーニング品を返します。
    *
-   * @param ticket チケット
+   * @param referenceNumber 整理番号
    * @return 返却物
    */
-  public CollectResult collect(Ticket ticket) {
-    Order order = findOrder(ticket.referenceNumber);
+  public CollectResult collect(String referenceNumber) {
+    Order order = findOrder(referenceNumber);
 
-    /* 加工が完了しているクリーニング品について、チケットから消しこんでいく */
-    List<CleaningItem> items = new ArrayList<>();
-    for (CleaningItem item : order.completedItems()) {
-      if (ticket.hasRemaining(item)) {
-        ticket.markAsCollected(item);
-        items.add(item);
-      }
+    List<CleaningItem> cleanItems = new ArrayList<>();
+    for (Order.OrderItem item : order.processedItems()) {
+      cleanItems.add(item.item);
+      item.collected();
     }
 
-    if (ticket.isDone()) {
-      orders.remove(ticket.referenceNumber);
-      return CollectResult.noRemainingItems(items.toArray(new CleaningItem[0]));
-    } else {
-      return CollectResult.remainingItems(ticket, items.toArray(new CleaningItem[0]));
+    if (order.remainingItems().length == 0) {
+      orders.remove(order.referenceNumber);
     }
+
+    return new CollectResult(order, cleanItems.toArray(new CleaningItem[0]));
   }
 
-  public CleaningShop completeProcess(String referenceNumber, CleaningItem item) {
+  /**
+   * 加工が完了したクリーニング品を納入します。
+   *
+   * @param referenceNumber 整理番号
+   * @param item クリーニング品
+   */
+  public void deliverProcessedItem(String referenceNumber, CleaningItem item) {
     Order order = findOrder(referenceNumber);
     order.completeProcess(item);
-    return this;
   }
 
   @Override

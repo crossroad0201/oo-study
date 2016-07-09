@@ -42,20 +42,22 @@ public class PriceList {
    * @param kind 品目
    * @return メニュー
    */
-  public Menu findMenu(Process process, ItemKind kind) {
+  public Optional<Menu> findMenu(Process process, ItemKind kind) {
+    // 加工 + 品目 で探す
     for (Menu menu : menus) {
       if (menu.kind.isPresent() && menu.kind.get() == kind && menu.process == process) {
-        return menu;
+        return Optional.of(menu);
       }
     }
 
+    // なければ、加工 で探す
     for (Menu menu : menus) {
       if (!menu.kind.isPresent() && menu.process == process) {
-        return menu;
+        return Optional.of(menu);
       }
     }
 
-    return null;
+    return Optional.empty();
   }
 
   @Override

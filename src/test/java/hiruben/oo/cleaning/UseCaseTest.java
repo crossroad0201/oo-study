@@ -3,13 +3,16 @@ package hiruben.oo.cleaning;
 import hiruben.oo.cleaning.model.*;
 import hiruben.oo.cleaning.model.Process;
 import org.junit.Test;
-import static org.junit.Assert.*;
-import static org.hamcrest.CoreMatchers.*;
+
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertThat;
 
 public class UseCaseTest {
 
   @Test
   public void 徳川さんの場合() {
+    TicketPrinter printer = new TicketPrinter();
+
     /*
      * 背広のドライクリーニング代金は800円、ワイシャツのドライは200円、水洗いは150円、防虫加工は品目にかかわらず一律500円である。
      */
@@ -22,7 +25,6 @@ public class UseCaseTest {
     );
     System.out.println(shop);
 
-    PriceList.Menu m = shop.priceList.findMenu(Process.DRY_CLEANING, ItemKind.SUIT);
 
     /*
      * 徳川さんから4月18日に、背広のドライクリーニングと防虫加工、ワイシャツの水洗いと防虫加工でお預かりした。
@@ -31,26 +33,32 @@ public class UseCaseTest {
     CleaningItem suit = new CleaningItem(ItemKind.SUIT, Process.DRY_CLEANING, Process.MOTHPROOFING);
     CleaningItem shirt = new CleaningItem(ItemKind.SHIRT, Process.WATER_WASH, Process.MOTHPROOFING);
 
-    Ticket ticket = shop.accept(tokugawa, suit, shirt);
-    System.out.println(ticket);
+    Order order = shop.accept(tokugawa, suit, shirt);
+    System.out.println("チケット");
+    System.out.println(printer.printTicket(order));
 
-    assertThat("チケットに整理番号が記載されている", ticket.referenceNumber, equalTo("123"));
-    assertThat("チケットに店名が記載されている", ticket.shopName, equalTo("テスト店"));
-    assertThat("チケットに顧客名が記載されている", ticket.customerName, equalTo("徳川"));
-    assertThat("チケットに顧客電話番号が記載されている", ticket.customerPhoneNumber, equalTo("06-1234-5678"));
-    assertThat("チケットの未返却品が、預けたクリーニング品と一致する", ticket.remainingItems().length, equalTo(2));
+    assertThat("チケットに整理番号が記載されている", order.referenceNumber, equalTo("123"));
+    assertThat("チケットに店名が記載されている", order.shop.name, equalTo("テスト店"));
+    assertThat("チケットに顧客名が記載されている", order.customer.name, equalTo("徳川"));
+    assertThat("チケットに顧客電話番号が記載されている", order.customer.phoneNumber, equalTo("06-1234-5678"));
+    assertThat("チケットの未返却品が、預けたクリーニング品と一致する", order.remainingItems().length, equalTo(2));
 
-    shop.completeProcess(ticket.referenceNumber, shirt);
+    shop.deliverProcessedItem(order.referenceNumber, shirt);
+
 
     /*
      * 徳川さんが4月21日に取りに見えたので、すでにできていたワイシャツだけをお返しした。
      */
-    CollectResult collected = shop.collect(ticket);
-    System.out.println(collected);
+    CollectResult collected = shop.collect(order.referenceNumber);
+    System.out.println("チケット");
+    System.out.println(printer.printTicket(collected.order));
+    System.out.println("返却されたクリーニング品");
+    for (CleaningItem i : collected.collectedItems) {
+      System.out.println(String.format("  %s\n", i));
+    }
 
-    assertThat("チケットが返却されている", collected.ticket.isPresent(), is(true));
-    assertThat("返却されたチケットの未返却品が、まだ受け取っていないクリーニング品と一致する", collected.ticket.get().remainingItems().length, equalTo(1));
-    assertThat("返却されたクリーニング品が一致する", collected.items.length, equalTo(1));
+    assertThat("返却されたチケットの未返却品が、まだ受け取っていないクリーニング品と一致する", collected.order.remainingItems().length, equalTo(1));
+    assertThat("返却されたクリーニング品が一致する", collected.collectedItems.length, equalTo(1));
   }
 
 }

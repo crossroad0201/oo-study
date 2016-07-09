@@ -2,50 +2,49 @@ package hiruben.oo.cleaning.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 「注文」です。
  */
-class Order {
+public class Order {
   /** 整理番号 */
-  final String referenceNumber;
+  public final String referenceNumber;
   /** 預かったクリーニング店 */
-  final CleaningShop shop;
+  public final CleaningShop shop;
   /** 注文したお客さん */
-  final Customer customer;
+  public final Customer customer;
   /** 預かったクリーニング品 */
-  final List<OrderItem> items = new ArrayList<>();
+  public final OrderItem[] items;
 
   Order(String referenceNumber, CleaningShop shop, Customer customer, CleaningItem... items) {
     this.referenceNumber = referenceNumber;
     this.shop = shop;
     this.customer = customer;
+
+    List<OrderItem> orderItems = new ArrayList<>();
     for (CleaningItem item : items) {
-      int price = 0;
-      for (Process p : item.processes) {
-        price += shop.priceList.findMenu(p, item.kind).price;
-      }
-      this.items.add(new OrderItem(item, price));
+      orderItems.add(new OrderItem(item, calcSubtotalPrice(item)));
     }
+    this.items = orderItems.toArray(new OrderItem[0]);
   }
 
   /**
-   * この注文から、チケットを発行します。
+   * クリーニング品ごとの料金の小計を計算します。
    *
-   * @return チケット
+   * @param item クリーニング品
+   * @return 料金
    */
-  Ticket issueTicket() {
-    List<Ticket.TicketItem> ticketItems = new ArrayList<>();
-    for (OrderItem item : items) {
-      ticketItems.add(new Ticket.TicketItem(item.item, item.price));
+  private int calcSubtotalPrice(CleaningItem item) {
+    int price = 0;
+    for (Process process : item.processes) {
+      Optional<PriceList.Menu> menu = shop.priceList.findMenu(process, item.kind);
+      if (!menu.isPresent()) {
+        throw new RuntimeException(String.format("メニューがありません。%s %s", item.kind, process));
+      }
+      price += menu.get().price;
     }
-
-    return new Ticket(
-      referenceNumber,
-      shop.name,
-      customer.name, customer.phoneNumber,
-      ticketItems.toArray(new Ticket.TicketItem[0])
-    );
+    return price;
   }
 
   /**
@@ -56,8 +55,8 @@ class Order {
    */
   Order completeProcess(CleaningItem item) {
     for (OrderItem i : items) {
-      if (i.item.equals(item) && i.state == ProcessState.ACCEPTED) {
-        i.completeProcess();
+      if (i.item.equals(item) && i.state == ItemState.ACCEPTED) {
+        i.processed();
         return this;
       }
     }
@@ -65,35 +64,50 @@ class Order {
   }
 
   /**
-   * この注文の、加工が完了したクリーニング品を返します。
+   * この注文の、加工済の明細を返します。
    *
-   * @return クリーニング品のリスト
+   * @return 明細のリスト
    */
-  CleaningItem[] completedItems() {
-    List<CleaningItem> completeds = new ArrayList<>();
+  OrderItem[] processedItems() {
+    List<OrderItem> completeds = new ArrayList<>();
     for (OrderItem item : items) {
-      if (item.state == ProcessState.COMPLETED) {
-        completeds.add(item.item);
+      if (item.state == ItemState.PROCESSED) {
+        completeds.add(item);
       }
     }
-    return completeds.toArray(new CleaningItem[0]);
+    return completeds.toArray(new OrderItem[0]);
+  }
+
+  /**
+   * この注文の、未返却の明細を返します。
+   *
+   * @return 明細のリスト
+   */
+  public OrderItem[] remainingItems() {
+    List<OrderItem> completeds = new ArrayList<>();
+    for (OrderItem item : items) {
+      if (item.state != ItemState.COLLECTED) {
+        completeds.add(item);
+      }
+    }
+    return completeds.toArray(new OrderItem[0]);
   }
 
   /**
    * 「注文明細」です。
    */
-  private static class OrderItem {
+  public static class OrderItem {
     /** クリーニング品 */
-    final CleaningItem item;
+    public final CleaningItem item;
     /** 価格 */
-    final int price;
+    public final int price;
     /** 加工状態 */
-    ProcessState state;
+    public ItemState state;
 
     OrderItem(CleaningItem item, int price) {
       this.item = item;
       this.price = price;
-      this.state = ProcessState.ACCEPTED;
+      this.state = ItemState.ACCEPTED;
     }
 
     /**
@@ -101,8 +115,18 @@ class Order {
      *
      * @return 自身
      */
-    OrderItem completeProcess() {
-      state = ProcessState.COMPLETED;
+    OrderItem processed() {
+      state = ItemState.PROCESSED;
+      return this;
+    }
+
+    /**
+     * 返却済みにします。
+     *
+     * @return 自身
+     */
+    OrderItem collected() {
+      state = ItemState.COLLECTED;
       return this;
     }
   }
