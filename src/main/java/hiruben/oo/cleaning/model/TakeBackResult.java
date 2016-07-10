@@ -3,14 +3,14 @@ package hiruben.oo.cleaning.model;
 /**
  * 返却物です。
  */
-public class CollectResult {
+public class TakeBackResult {
   /** 注文 */
   public final Order order;
   /** 今回仕上がっていたクリーニング品 */
-  public final CleaningItem[] collectedItems;
+  public final CleaningItem[] processedItems;
 
-  CollectResult(Order order, CleaningItem... items) {
+  TakeBackResult(Order order, CleaningItem... items) {
     this.order = order;
-    this.collectedItems = items;
+    this.processedItems = items;
   }
 }

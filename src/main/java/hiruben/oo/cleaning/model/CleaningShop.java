@@ -61,20 +61,20 @@ public class CleaningShop {
    * @param referenceNumber 整理番号
    * @return 返却物
    */
-  public CollectResult collect(String referenceNumber) {
+  public TakeBackResult takeBack(String referenceNumber) {
     Order order = findOrder(referenceNumber);
 
     List<CleaningItem> cleanItems = new ArrayList<>();
     for (Order.OrderItem item : order.processedItems()) {
       cleanItems.add(item.item);
-      item.collected();
+      item.takenBack();
     }
 
     if (order.remainingItems().length == 0) {
       orders.remove(order.referenceNumber);
     }
 
-    return new CollectResult(order, cleanItems.toArray(new CleaningItem[0]));
+    return new TakeBackResult(order, cleanItems.toArray(new CleaningItem[0]));
   }
 
   /**

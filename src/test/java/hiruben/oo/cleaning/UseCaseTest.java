@@ -64,16 +64,16 @@ public class UseCaseTest {
     System.out.println("");
     System.out.println("==== 4/21 お返し =============================================================================");
 
-    CollectResult collected = shop.collect(order.referenceNumber);
+    TakeBackResult takenBack = shop.takeBack(order.referenceNumber);
     System.out.println("チケット");
-    System.out.println(printer.printTicket(collected.order));
+    System.out.println(printer.printTicket(takenBack.order));
     System.out.println("返却されたクリーニング品");
-    for (CleaningItem i : collected.collectedItems) {
+    for (CleaningItem i : takenBack.processedItems) {
       System.out.println(String.format("  %s", i));
     }
 
-    assertThat("返却されたチケットの未返却品が、まだ受け取っていないクリーニング品と一致する", collected.order.remainingItems().length, equalTo(1));
-    assertThat("返却されたクリーニング品が一致する", collected.collectedItems.length, equalTo(1));
+    assertThat("返却されたチケットの未返却品が、まだ受け取っていないクリーニング品と一致する", takenBack.order.remainingItems().length, equalTo(1));
+    assertThat("返却されたクリーニング品が一致する", takenBack.processedItems.length, equalTo(1));
   }
 
 }

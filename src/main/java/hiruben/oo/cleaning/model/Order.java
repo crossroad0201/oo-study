@@ -69,13 +69,13 @@ public class Order {
    * @return 明細のリスト
    */
   OrderItem[] processedItems() {
-    List<OrderItem> completeds = new ArrayList<>();
+    List<OrderItem> founds = new ArrayList<>();
     for (OrderItem item : items) {
       if (item.state == ItemState.PROCESSED) {
-        completeds.add(item);
+        founds.add(item);
       }
     }
-    return completeds.toArray(new OrderItem[0]);
+    return founds.toArray(new OrderItem[0]);
   }
 
   /**
@@ -84,13 +84,13 @@ public class Order {
    * @return 明細のリスト
    */
   public OrderItem[] remainingItems() {
-    List<OrderItem> completeds = new ArrayList<>();
+    List<OrderItem> founds = new ArrayList<>();
     for (OrderItem item : items) {
-      if (item.state != ItemState.COLLECTED) {
-        completeds.add(item);
+      if (item.state != ItemState.TAKENBACK) {
+        founds.add(item);
       }
     }
-    return completeds.toArray(new OrderItem[0]);
+    return founds.toArray(new OrderItem[0]);
   }
 
   /**
@@ -125,8 +125,8 @@ public class Order {
      *
      * @return 自身
      */
-    OrderItem collected() {
-      state = ItemState.COLLECTED;
+    OrderItem takenBack() {
+      state = ItemState.TAKENBACK;
       return this;
     }
   }

@@ -9,5 +9,5 @@ enum ItemState {
   /** 加工済 */
   PROCESSED,
   /** 返却済 */
-  COLLECTED;
+  TAKENBACK;
 }
