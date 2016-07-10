@@ -33,11 +33,13 @@ public class UseCaseTest {
     System.out.println("==== 4/18 預かり =============================================================================");
 
     Customer tokugawa = new Customer("徳川", "06-1234-5678");
-    CleaningItem suit = new CleaningItem(ItemKind.SUIT, Process.DRY_CLEANING, Process.MOTHPROOFING);
-    CleaningItem shirt = new CleaningItem(ItemKind.SHIRT, Process.WATER_WASH, Process.MOTHPROOFING);
+    CleaningItem sebiro = new CleaningItem(ItemKind.SUIT, Process.DRY_CLEANING, Process.MOTHPROOFING);
+    CleaningItem yShirt = new CleaningItem(ItemKind.SHIRT, Process.WATER_WASH, Process.MOTHPROOFING);
 
-    Order order = shop.accept(tokugawa, suit, shirt);
-    System.out.println("チケット");
+    // 預かり
+    Order order = shop.accept(tokugawa, sebiro, yShirt);
+
+    // チケットを出力
     System.out.println(printer.printTicket(order));
 
     assertThat("チケットに整理番号が記載されている", order.referenceNumber, equalTo("123"));
@@ -46,16 +48,15 @@ public class UseCaseTest {
     assertThat("チケットに顧客電話番号が記載されている", order.customer.phoneNumber, equalTo("06-1234-5678"));
     assertThat("チケットの未返却品が、預けたクリーニング品と一致する", order.remainingItems().length, equalTo(2));
 
+    // タグを出力
     String[] tags = printer.printTags(order);
     System.out.println("");
-    System.out.println("タグ");
     for (String tag : tags) {
-      System.out.println(String.format("  %s", tag));
+      System.out.println(tag);
     }
 
-
     // 加工が終わったシャツを、クリーニング店に納入。
-    shop.deliverProcessedItem(order.referenceNumber, shirt);
+    shop.deliverProcessedItem(order.referenceNumber, yShirt);
 
 
     /*
@@ -64,16 +65,20 @@ public class UseCaseTest {
     System.out.println("");
     System.out.println("==== 4/21 お返し =============================================================================");
 
+    // お返し
     TakeBackResult takenBack = shop.takeBack(order.referenceNumber);
-    System.out.println("チケット");
+
+    assertThat("返却されたチケットの未返却品が、まだ受け取っていないクリーニング品と一致する", takenBack.order.remainingItems().length, equalTo(1));
+    assertThat("返却されたクリーニング品が一致する", takenBack.processedItems.length, equalTo(1));
+
+    // チケットを出力
     System.out.println(printer.printTicket(takenBack.order));
+
+    System.out.println("");
     System.out.println("返却されたクリーニング品");
     for (CleaningItem i : takenBack.processedItems) {
       System.out.println(String.format("  %s", i));
     }
-
-    assertThat("返却されたチケットの未返却品が、まだ受け取っていないクリーニング品と一致する", takenBack.order.remainingItems().length, equalTo(1));
-    assertThat("返却されたクリーニング品が一致する", takenBack.processedItems.length, equalTo(1));
   }
 
 }

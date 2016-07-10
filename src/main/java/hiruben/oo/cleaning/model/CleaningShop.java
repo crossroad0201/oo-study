@@ -52,8 +52,9 @@ public class CleaningShop {
    *
    * @param referenceNumber 整理番号
    * @param item クリーニング品
+   * @return 注文
    */
-  public void deliverProcessedItem(String referenceNumber, CleaningItem item) {
+  public Order deliverProcessedItem(String referenceNumber, CleaningItem item) {
     Order order = findOrder(referenceNumber);
 
     for (Order.OrderItem oItem : order.acceptedItems()) {
@@ -61,6 +62,8 @@ public class CleaningShop {
         oItem.markAsProcessed();
       }
     }
+
+    return order;
   }
 
   /**
