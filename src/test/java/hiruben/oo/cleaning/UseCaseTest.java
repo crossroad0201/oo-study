@@ -11,7 +11,7 @@ public class UseCaseTest {
 
   @Test
   public void 徳川さんの場合() {
-    TicketPrinter printer = new TicketPrinter();
+    Printer printer = new Printer();
 
     /*
      * 背広のドライクリーニング代金は800円、ワイシャツのドライは200円、水洗いは150円、防虫加工は品目にかかわらず一律500円である。
@@ -29,6 +29,9 @@ public class UseCaseTest {
     /*
      * 徳川さんから4月18日に、背広のドライクリーニングと防虫加工、ワイシャツの水洗いと防虫加工でお預かりした。
      */
+    System.out.println("");
+    System.out.println("==== 4/18 預かり =============================================================================");
+
     Customer tokugawa = new Customer("徳川", "06-1234-5678");
     CleaningItem suit = new CleaningItem(ItemKind.SUIT, Process.DRY_CLEANING, Process.MOTHPROOFING);
     CleaningItem shirt = new CleaningItem(ItemKind.SHIRT, Process.WATER_WASH, Process.MOTHPROOFING);
@@ -43,18 +46,30 @@ public class UseCaseTest {
     assertThat("チケットに顧客電話番号が記載されている", order.customer.phoneNumber, equalTo("06-1234-5678"));
     assertThat("チケットの未返却品が、預けたクリーニング品と一致する", order.remainingItems().length, equalTo(2));
 
+    String[] tags = printer.printTags(order);
+    System.out.println("");
+    System.out.println("タグ");
+    for (String tag : tags) {
+      System.out.println(String.format("  %s", tag));
+    }
+
+
+    // 加工が終わったシャツを、クリーニング店に納入。
     shop.deliverProcessedItem(order.referenceNumber, shirt);
 
 
     /*
      * 徳川さんが4月21日に取りに見えたので、すでにできていたワイシャツだけをお返しした。
      */
+    System.out.println("");
+    System.out.println("==== 4/21 お返し =============================================================================");
+
     CollectResult collected = shop.collect(order.referenceNumber);
     System.out.println("チケット");
     System.out.println(printer.printTicket(collected.order));
     System.out.println("返却されたクリーニング品");
     for (CleaningItem i : collected.collectedItems) {
-      System.out.println(String.format("  %s\n", i));
+      System.out.println(String.format("  %s", i));
     }
 
     assertThat("返却されたチケットの未返却品が、まだ受け取っていないクリーニング品と一致する", collected.order.remainingItems().length, equalTo(1));

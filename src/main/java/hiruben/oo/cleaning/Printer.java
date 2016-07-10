@@ -1,12 +1,16 @@
 package hiruben.oo.cleaning;
 
 import hiruben.oo.cleaning.model.Order;
+import hiruben.oo.cleaning.model.Process;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * チケットを出力するプリンタです。
+ * プリンタです。
  *
  */
-public class TicketPrinter {
+public class Printer {
 
   /**
    * チケットを出力します。
@@ -29,6 +33,22 @@ public class TicketPrinter {
 
     s.append("--------------------------------------");
     return s.toString();
+  }
+
+  /**
+   * タグを出力します。
+   *
+   * @param order 注文
+   * @return タグのリスト
+   */
+  public String[] printTags(Order order) {
+    List<String> tags = new ArrayList<>();
+    for (Order.OrderItem item : order.items) {
+      for (Process process : item.item.processes) {
+        tags.add(String.format("整理番号 : %s / 品目 : %s /  加工 : %s", order.referenceNumber, item.item.kind, process));
+      }
+    }
+    return tags.toArray(new String[0]);
   }
 
 }
