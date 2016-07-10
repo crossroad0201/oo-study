@@ -1,9 +1,9 @@
 package hiruben.oo.cleaning.model;
 
 /**
- * 「加工」です。
+ * 「加工方法」です。
  */
-public enum Process {
+public enum ProcessKind {
   /** ドライクリーニング */
   DRY_CLEANING,
   /** 水洗い */

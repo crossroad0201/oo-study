@@ -1,7 +1,7 @@
 package hiruben.oo.cleaning;
 
 import hiruben.oo.cleaning.model.Order;
-import hiruben.oo.cleaning.model.Process;
+import hiruben.oo.cleaning.model.ProcessKind;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +44,7 @@ public class Printer {
   public String[] printTags(Order order) {
     List<String> tags = new ArrayList<>();
     for (Order.OrderItem item : order.items) {
-      for (Process process : item.item.processes) {
+      for (ProcessKind process : item.item.processes) {
         StringBuilder s = new StringBuilder()
             .append("+--- タグ ----------------------------------------------\n")
             .append(String.format("| 整理番号 : %s / 品目 : %s /  加工 : %s\n", order.referenceNumber, item.item.kind, process))

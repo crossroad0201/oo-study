@@ -18,7 +18,7 @@ public class PriceList {
    * @param price 価格
    * @return 自身
    */
-  public PriceList addMenu(Process process, ItemKind itemKind, int price) {
+  public PriceList addMenu(ProcessKind process, ItemKind itemKind, int price) {
     menus.add(Menu.forItem(process, itemKind, price));
     return this;
   }
@@ -30,7 +30,7 @@ public class PriceList {
    * @param price 価格
    * @return 自身
    */
-  public PriceList addMenu(Process process, int price) {
+  public PriceList addMenu(ProcessKind process, int price) {
     menus.add(Menu.forAllItem(process, price));
     return this;
   }
@@ -42,7 +42,7 @@ public class PriceList {
    * @param kind 品目
    * @return メニュー
    */
-  public Optional<Menu> findMenu(Process process, ItemKind kind) {
+  public Optional<Menu> findMenu(ProcessKind process, ItemKind kind) {
     // 加工 + 品目 で探す
     for (Menu menu : menus) {
       if (menu.kind.isPresent() && menu.kind.get() == kind && menu.process == process) {
@@ -77,23 +77,23 @@ public class PriceList {
    */
   public static class Menu {
     /** 加工 */
-    public final Process process;
+    public final ProcessKind process;
     /** 品目 */
     public final Optional<ItemKind> kind;
     /** 価格 */
     public final int price;
 
-    private Menu(Process process, Optional<ItemKind> kind, int price) {
+    private Menu(ProcessKind process, Optional<ItemKind> kind, int price) {
       this.process = process;
       this.kind = kind;
       this.price = price;
     }
 
-    static Menu forItem(Process process, ItemKind itemKind, int price) {
+    static Menu forItem(ProcessKind process, ItemKind itemKind, int price) {
       return new Menu(process, Optional.of(itemKind), price);
     }
 
-    static Menu forAllItem(Process process, int price) {
+    static Menu forAllItem(ProcessKind process, int price) {
       return new Menu(process, Optional.empty(), price);
     }
 

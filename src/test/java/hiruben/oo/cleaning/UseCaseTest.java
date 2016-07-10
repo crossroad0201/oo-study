@@ -1,7 +1,7 @@
 package hiruben.oo.cleaning;
 
 import hiruben.oo.cleaning.model.*;
-import hiruben.oo.cleaning.model.Process;
+import hiruben.oo.cleaning.model.ProcessKind;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -18,10 +18,10 @@ public class UseCaseTest {
      */
     CleaningShop shop = new CleaningShop("テスト店",
         new PriceList()
-          .addMenu(Process.DRY_CLEANING, ItemKind.SUIT, 800)
-          .addMenu(Process.DRY_CLEANING, ItemKind.SHIRT, 200)
-          .addMenu(Process.WATER_WASH, ItemKind.SHIRT, 150)
-          .addMenu(Process.MOTHPROOFING, 500)
+          .addMenu(ProcessKind.DRY_CLEANING, ItemKind.SUIT, 800)
+          .addMenu(ProcessKind.DRY_CLEANING, ItemKind.SHIRT, 200)
+          .addMenu(ProcessKind.WATER_WASH, ItemKind.SHIRT, 150)
+          .addMenu(ProcessKind.MOTHPROOFING, 500)
     );
     System.out.println(shop);
 
@@ -33,8 +33,8 @@ public class UseCaseTest {
     System.out.println("==== 4/18 預かり =============================================================================");
 
     Customer tokugawa = new Customer("徳川", "06-1234-5678");
-    CleaningItem sebiro = new CleaningItem(ItemKind.SUIT, Process.DRY_CLEANING, Process.MOTHPROOFING);
-    CleaningItem yShirt = new CleaningItem(ItemKind.SHIRT, Process.WATER_WASH, Process.MOTHPROOFING);
+    CleaningItem sebiro = new CleaningItem(ItemKind.SUIT, ProcessKind.DRY_CLEANING, ProcessKind.MOTHPROOFING);
+    CleaningItem yShirt = new CleaningItem(ItemKind.SHIRT, ProcessKind.WATER_WASH, ProcessKind.MOTHPROOFING);
 
     // 預かり
     Order order = shop.accept(tokugawa, sebiro, yShirt);
@@ -66,7 +66,7 @@ public class UseCaseTest {
     System.out.println("==== 4/21 お返し =============================================================================");
 
     // お返し
-    TakeBackResult takenBack = shop.takeBack(order.referenceNumber);
+    CleaningShop.TakeBackResult takenBack = shop.takeBack(order.referenceNumber);
 
     assertThat("返却されたチケットの未返却品が、まだ受け取っていないクリーニング品と一致する", takenBack.order.remainingItems().length, equalTo(1));
     assertThat("返却されたクリーニング品が一致する", takenBack.processedItems.length, equalTo(1));

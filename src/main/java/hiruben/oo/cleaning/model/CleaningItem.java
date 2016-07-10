@@ -11,14 +11,14 @@ public class CleaningItem {
   /** 品目 */
   public final ItemKind kind;
   /** 加工方法 */
-  public final Process[] processes;
+  public final ProcessKind[] processes;
 
-  public CleaningItem(ItemKind kind, Process process, Process... additonalProcesses) {
+  public CleaningItem(ItemKind kind, ProcessKind process, ProcessKind... additonalProcesses) {
     this.kind = kind;
-    List<Process> ps = new ArrayList<Process>();
+    List<ProcessKind> ps = new ArrayList<ProcessKind>();
     ps.add(process);
     ps.addAll(Arrays.asList(additonalProcesses));
-    this.processes = ps.toArray(new Process[0]);
+    this.processes = ps.toArray(new ProcessKind[0]);
   }
 
   @Override

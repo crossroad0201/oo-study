@@ -30,7 +30,7 @@ public class CleaningShop {
    */
   public Order accept(Customer customer, CleaningItem... items) {
     for (CleaningItem item : items) {
-      for (Process process : item.processes) {
+      for (ProcessKind process : item.processes) {
         if (!priceList.findMenu(process, item.kind).isPresent()) {
           throw new RuntimeException(String.format("メニューがありません。%s %s", item.kind, process));
         }
@@ -104,4 +104,20 @@ public class CleaningShop {
 
     return s.toString();
   }
+
+  /**
+   * 返却物です。
+   */
+  public static class TakeBackResult {
+    /** 注文 */
+    public final Order order;
+    /** 今回仕上がっていたクリーニング品 */
+    public final CleaningItem[] processedItems;
+
+    private TakeBackResult(Order order, CleaningItem... items) {
+      this.order = order;
+      this.processedItems = items;
+    }
+  }
+
 }

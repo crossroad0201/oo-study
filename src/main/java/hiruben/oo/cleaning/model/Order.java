@@ -38,7 +38,7 @@ public class Order {
    */
   private int calcSubtotalPrice(CleaningItem item) {
     int price = 0;
-    for (Process process : item.processes) {
+    for (ProcessKind process : item.processes) {
       Optional<PriceList.Menu> menu = shop.priceList.findMenu(process, item.kind);
       if (!menu.isPresent()) {
         throw new RuntimeException(String.format("メニューがありません。%s %s", item.kind, process));
