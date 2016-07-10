@@ -3,6 +3,7 @@ package hiruben.oo.cleaning.model;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 /**
  * 「注文」です。
@@ -48,19 +49,12 @@ public class Order {
   }
 
   /**
-   * この注文のクリーニング品の加工を完了します。
+   * この注文の、受付済の明細を返します。
    *
-   * @param item クリーニング品
-   * @return 自身
+   * @return 明細のリスト
    */
-  Order completeProcess(CleaningItem item) {
-    for (OrderItem i : items) {
-      if (i.item.equals(item) && i.state == ItemState.ACCEPTED) {
-        i.processed();
-        return this;
-      }
-    }
-    throw new RuntimeException(String.format("この注文には、該当する未加工のクリーニング品はありません。 %s", item));
+  OrderItem[] acceptedItems() {
+    return filteredItemsBy(i -> i.state == ItemState.ACCEPTED);
   }
 
   /**
@@ -69,13 +63,7 @@ public class Order {
    * @return 明細のリスト
    */
   OrderItem[] processedItems() {
-    List<OrderItem> founds = new ArrayList<>();
-    for (OrderItem item : items) {
-      if (item.state == ItemState.PROCESSED) {
-        founds.add(item);
-      }
-    }
-    return founds.toArray(new OrderItem[0]);
+    return filteredItemsBy(i -> i.state == ItemState.PROCESSED);
   }
 
   /**
@@ -84,9 +72,13 @@ public class Order {
    * @return 明細のリスト
    */
   public OrderItem[] remainingItems() {
+    return filteredItemsBy(i -> i.state != ItemState.TAKENBACK);
+  }
+
+  private OrderItem[] filteredItemsBy(Predicate<OrderItem> predicate) {
     List<OrderItem> founds = new ArrayList<>();
     for (OrderItem item : items) {
-      if (item.state != ItemState.TAKENBACK) {
+      if (predicate.test(item)) {
         founds.add(item);
       }
     }
@@ -115,7 +107,7 @@ public class Order {
      *
      * @return 自身
      */
-    OrderItem processed() {
+    OrderItem markAsProcessed() {
       state = ItemState.PROCESSED;
       return this;
     }
@@ -125,7 +117,7 @@ public class Order {
      *
      * @return 自身
      */
-    OrderItem takenBack() {
+    OrderItem markAsTakenBack() {
       state = ItemState.TAKENBACK;
       return this;
     }

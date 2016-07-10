@@ -47,12 +47,20 @@ public class CleaningShop {
     return "123";
   }
 
-  private Order findOrder(String referenceNumber) {
-    if (!orders.containsKey(referenceNumber)) {
-      throw new RuntimeException(String.format("整理番号 %s の注文はありません。", referenceNumber));
-    }
+  /**
+   * 加工が完了したクリーニング品を納入します。
+   *
+   * @param referenceNumber 整理番号
+   * @param item クリーニング品
+   */
+  public void deliverProcessedItem(String referenceNumber, CleaningItem item) {
+    Order order = findOrder(referenceNumber);
 
-    return orders.get(referenceNumber);
+    for (Order.OrderItem oItem : order.acceptedItems()) {
+      if (oItem.item.equals(item)) {
+        oItem.markAsProcessed();
+      }
+    }
   }
 
   /**
@@ -67,7 +75,7 @@ public class CleaningShop {
     List<CleaningItem> cleanItems = new ArrayList<>();
     for (Order.OrderItem item : order.processedItems()) {
       cleanItems.add(item.item);
-      item.takenBack();
+      item.markAsTakenBack();
     }
 
     if (order.remainingItems().length == 0) {
@@ -77,15 +85,12 @@ public class CleaningShop {
     return new TakeBackResult(order, cleanItems.toArray(new CleaningItem[0]));
   }
 
-  /**
-   * 加工が完了したクリーニング品を納入します。
-   *
-   * @param referenceNumber 整理番号
-   * @param item クリーニング品
-   */
-  public void deliverProcessedItem(String referenceNumber, CleaningItem item) {
-    Order order = findOrder(referenceNumber);
-    order.completeProcess(item);
+  private Order findOrder(String referenceNumber) {
+    if (!orders.containsKey(referenceNumber)) {
+      throw new RuntimeException(String.format("整理番号 %s の注文はありません。", referenceNumber));
+    }
+
+    return orders.get(referenceNumber);
   }
 
   @Override
