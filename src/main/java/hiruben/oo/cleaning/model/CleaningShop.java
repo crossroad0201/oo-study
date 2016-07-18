@@ -28,7 +28,7 @@ public class CleaningShop {
    * @param items クリーニング品
    * @return 注文
    */
-  public Order accept(Customer customer, CleaningItem... items) {
+  public Order acceptCleaningItem(Customer customer, CleaningItem... items) {
     for (CleaningItem item : items) {
       for (ProcessKind process : item.processes) {
         if (!priceList.findMenu(process, item.kind).isPresent()) {
@@ -48,13 +48,13 @@ public class CleaningShop {
   }
 
   /**
-   * 加工が完了したクリーニング品を納入します。
+   * 加工が完了したクリーニング品を搬入します。
    *
    * @param referenceNumber 整理番号
    * @param item クリーニング品
    * @return 注文
    */
-  public Order deliverProcessedItem(String referenceNumber, CleaningItem item) {
+  public Order receiveProcessedItem(String referenceNumber, CleaningItem item) {
     Order order = findOrder(referenceNumber);
 
     for (Order.OrderItem oItem : order.acceptedItems()) {
@@ -72,20 +72,20 @@ public class CleaningShop {
    * @param referenceNumber 整理番号
    * @return 返却物
    */
-  public TakeBackResult takeBack(String referenceNumber) {
+  public ReturnResult returnCleaningItem(String referenceNumber) {
     Order order = findOrder(referenceNumber);
 
     List<CleaningItem> cleanItems = new ArrayList<>();
     for (Order.OrderItem item : order.processedItems()) {
       cleanItems.add(item.item);
-      item.markAsTakenBack();
+      item.markAsReturned();
     }
 
     if (order.remainingItems().length == 0) {
       orders.remove(order.referenceNumber);
     }
 
-    return new TakeBackResult(order, cleanItems.toArray(new CleaningItem[0]));
+    return new ReturnResult(order, cleanItems.toArray(new CleaningItem[0]));
   }
 
   private Order findOrder(String referenceNumber) {
@@ -108,13 +108,13 @@ public class CleaningShop {
   /**
    * 返却物です。
    */
-  public static class TakeBackResult {
+  public static class ReturnResult {
     /** 注文 */
     public final Order order;
     /** 今回仕上がっていたクリーニング品 */
     public final CleaningItem[] processedItems;
 
-    private TakeBackResult(Order order, CleaningItem... items) {
+    private ReturnResult(Order order, CleaningItem... items) {
       this.order = order;
       this.processedItems = items;
     }

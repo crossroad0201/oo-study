@@ -37,7 +37,7 @@ public class UseCaseTest {
     CleaningItem yShirt = new CleaningItem(ItemKind.SHIRT, ProcessKind.WATER_WASH, ProcessKind.MOTHPROOFING);
 
     // 預かり
-    Order order = shop.accept(tokugawa, sebiro, yShirt);
+    Order order = shop.acceptCleaningItem(tokugawa, sebiro, yShirt);
 
     // チケットを出力
     System.out.println(printer.printTicket(order));
@@ -56,7 +56,7 @@ public class UseCaseTest {
     }
 
     // 加工が終わったシャツを、クリーニング店に納入。
-    shop.deliverProcessedItem(order.referenceNumber, yShirt);
+    shop.receiveProcessedItem(order.referenceNumber, yShirt);
 
 
     /*
@@ -66,17 +66,17 @@ public class UseCaseTest {
     System.out.println("==== 4/21 お返し =============================================================================");
 
     // お返し
-    CleaningShop.TakeBackResult takenBack = shop.takeBack(order.referenceNumber);
+    CleaningShop.ReturnResult result = shop.returnCleaningItem(order.referenceNumber);
 
-    assertThat("返却されたチケットの未返却品が、まだ受け取っていないクリーニング品と一致する", takenBack.order.remainingItems().length, equalTo(1));
-    assertThat("返却されたクリーニング品が一致する", takenBack.processedItems.length, equalTo(1));
+    assertThat("返却されたチケットの未返却品が、まだ受け取っていないクリーニング品と一致する", result.order.remainingItems().length, equalTo(1));
+    assertThat("返却されたクリーニング品が一致する", result.processedItems.length, equalTo(1));
 
     // チケットを出力
-    System.out.println(printer.printTicket(takenBack.order));
+    System.out.println(printer.printTicket(result.order));
 
     System.out.println("");
     System.out.println("返却されたクリーニング品");
-    for (CleaningItem i : takenBack.processedItems) {
+    for (CleaningItem i : result.processedItems) {
       System.out.println(String.format("  %s", i));
     }
   }

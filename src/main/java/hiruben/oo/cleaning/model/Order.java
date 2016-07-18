@@ -72,7 +72,7 @@ public class Order {
    * @return 明細のリスト
    */
   public OrderItem[] remainingItems() {
-    return filteredItemsBy(i -> i.state != ItemState.TAKENBACK);
+    return filteredItemsBy(i -> i.state != ItemState.RETURNED);
   }
 
   private OrderItem[] filteredItemsBy(Predicate<OrderItem> predicate) {
@@ -117,8 +117,8 @@ public class Order {
      *
      * @return 自身
      */
-    OrderItem markAsTakenBack() {
-      state = ItemState.TAKENBACK;
+    OrderItem markAsReturned() {
+      state = ItemState.RETURNED;
       return this;
     }
   }
